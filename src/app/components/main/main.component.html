@@ -8,14 +8,19 @@
       [(ngModel)]="todo.text"
       (keyup.enter)="addTodo()"
     />
-    <input
-      matInput
-      [matDatepicker]="picker"
-      placeholder="Choose a date"
-      [(ngModel)]="todo.reminder"
-    />
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
+    <mat-form-field>
+      <input
+        matInput
+        [ngxMatDatetimePicker]="picker"
+        placeholder="Choose a date and time"
+        [(ngModel)]="todo.reminder"
+      />
+      <mat-datepicker-toggle
+        matSuffix
+        [for]="$any(picker)"
+      ></mat-datepicker-toggle>
+      <ngx-mat-datetime-picker #picker></ngx-mat-datetime-picker>
+    </mat-form-field>
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       (click)="addTodo()"
@@ -30,8 +35,8 @@
       class="flex justify-between items-center p-2 border border-gray-300 rounded"
       *ngFor="let todo of todos; let i = index"
     >
-      <!-- if todo is done strike it out -->
       <span [ngClass]="{ 'line-through': todo.done }">{{ todo.text }}</span>
+      <span *ngIf="todo.reminder"> - Time Left: {{ todo.timeLeft }}</span>
       <div class="flex gap-4">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
@@ -42,7 +47,6 @@
       </div>
     </li>
   </ul>
-  <!-- a list of doneTodos same as above -->
   <h2 class="text-2xl font-bold mt-8">Done Todos</h2>
   <ul class="mt-4">
     <li
@@ -59,7 +63,6 @@
         >
           Undone
         </button>
-        <!-- deletebutton -->
         <button
           class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
           (click)="deleteTodo(i)"
