@@ -8,6 +8,14 @@
       [(ngModel)]="todo.text"
       (keyup.enter)="addTodo()"
     />
+    <input
+      matInput
+      [matDatepicker]="picker"
+      placeholder="Choose a date"
+      [(ngModel)]="todo.reminder"
+    />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       (click)="addTodo()"
@@ -15,6 +23,7 @@
       Add
     </button>
   </div>
+
   <h2 class="text-2xl font-bold mt-8">Todos</h2>
   <ul class="mt-4">
     <li
