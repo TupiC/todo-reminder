@@ -1,11 +1,11 @@
 {
-  "name": "todo-reminder",
-  "short_name": "todo-reminder",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "name": "Todo Reminder",
+  "short_name": "Todo",
+  "start_url": "/",
   "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1976d2",
   "scope": "./",
-  "start_url": "./",
   "icons": [
     {
       "src": "assets/icons/icon-72x72.png",
