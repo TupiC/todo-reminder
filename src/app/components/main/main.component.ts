@@ -12,9 +12,12 @@ export class MainComponent {
 
 
   addTodo() {
-    this.todos.push(this.todo);
-    this.todo = { text: '', done: false, reminder: new Date() };
+    if (this.todo.text.trim()) {
+      this.todos.push({ ...this.todo });
+      this.todo = { text: '', done: false, reminder: new Date() };
+    }
   }
+
 
   deleteTodo(index: number) {
     this.doneTodos.splice(index, 1);

@@ -22,7 +22,7 @@
       *ngFor="let todo of todos; let i = index"
     >
       <!-- if todo is done strike it out -->
-      <span class="{ 'line-through': todo.done }">{{ todo.text }}</span>
+      <span [ngClass]="{ 'line-through': todo.done }">{{ todo.text }}</span>
       <div class="flex gap-4">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"
@@ -40,7 +40,7 @@
       class="flex justify-between items-center p-2 border border-gray-300 rounded"
       *ngFor="let doneTodo of doneTodos; let i = index"
     >
-      <span ngClass="{ 'line-through': doneTodo.done }">{{
+      <span [ngClass]="{ 'line-through': doneTodo.done }">{{
         doneTodo.text
       }}</span>
       <div class="flex gap-4">
