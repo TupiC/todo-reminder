@@ -36,7 +36,7 @@
       *ngFor="let todo of todos; let i = index"
     >
       <span [ngClass]="{ 'line-through': todo.done }">{{ todo.text }}</span>
-      <span *ngIf="todo.reminder"> - Time Left: {{ todo.timeLeft }}</span>
+      <span *ngIf="todo.reminder">Time Left: {{ todo.timeLeft }}</span>
       <div class="flex gap-4">
         <button
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded"

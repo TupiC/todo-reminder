@@ -62,6 +62,9 @@ export class MainComponent implements OnInit {
     const hours = Math.floor(timeLeft / (1000 * 60 * 60));
     const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+    if (timeLeft <= 0) {
+      return '0s';
+    }
     return `${hours}h ${minutes}m ${seconds}s`;
   }
 }
