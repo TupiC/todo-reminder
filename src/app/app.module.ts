@@ -1,5 +1,6 @@
 import { NgModule, isDevMode } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { AppComponent } from './app.component';
 import { MainComponent } from './components/main/main.component';
@@ -8,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
+import { MatCardModule } from '@angular/material/card';
 import { MatNativeDateModule } from '@angular/material/core'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxMatDatetimePickerModule, NgxMatNativeDateModule, NgxMatTimepickerModule } from '@angular-material-components/datetime-picker';
@@ -29,9 +31,12 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     NgxMatDatetimePickerModule,
     NgxMatNativeDateModule,
     NgxMatTimepickerModule,
+    MatProgressSpinnerModule,
+    MatCardModule,
     FormsModule,
-    ServiceWorkerModule.register('custom-sw.js', {
-      enabled: !isDevMode(),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: true,
+      // enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:10000'
     }),
   ],

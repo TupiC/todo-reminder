@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { IndexedDbService } from 'src/app/services/indexed-db.service';
+import { Subscription } from 'rxjs';
+import { IndexedDbService } from 'src/app/services/IndexedDB.service';
+import { WebServiceWorker } from 'src/app/services/WebServiceWorker.service';
 
 @Component({
   selector: 'app-main',
@@ -17,22 +19,19 @@ export class MainComponent implements OnInit {
   deferredPrompt: any;
   customNotification: any = null;
 
-  constructor(private indexedDbService: IndexedDbService) {
+  isLoaded = false;
+
+  isNewAppVersionAvailable: boolean = false;
+  newAppUpdateAvailableSubscription!: Subscription;
+
+  constructor(private indexedDbService: IndexedDbService, private webServiceWorker: WebServiceWorker) {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('custom-sw.js').then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      navigator.serviceWorker.register('ngsw-worker.js').then(registration => {
+        console.log('Custom ServiceWorker registration successful with scope: ', registration.scope);
       }).catch(err => {
-        console.error('ServiceWorker registration failed: ', err);
+        console.error('Custom ServiceWorker registration failed: ', err);
       });
     }
-
-    window.addEventListener('beforeinstallprompt', event => {
-      event.preventDefault();
-      this.deferredPrompt = event;
-      const element = document.getElementById('install-button');
-      if (element)
-        element.style.display = 'block';
-    });
 
     setInterval(() => {
       this.todos.filter(todo => todo.sentPush === false).forEach(todo => {
@@ -44,39 +43,34 @@ export class MainComponent implements OnInit {
               body: todo.text,
               icon: 'assets/icons/icon-72x72.png',
             });
+            console.log('Push notification sent:', todo.text);
           }
         }
       });
     }, 1000);
-
-
 
     navigator.serviceWorker.addEventListener('message', event => {
       console.log('Push message received:', event.data);
     });
   }
 
-  speechToText() {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Your browser does not support speech recognition');
-      return;
-    }
-    const recognition = new (window as any).webkitSpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.start();
-    this.speakButtonText = 'Listening...';
-    recognition.onend = () =>
-      (this.speakButtonText = 'Speak');
-    recognition.onresult = (event: any) => {
-      this.todo.text = event.results[0][0].transcript;
-    };
-  }
-
   async ngOnInit() {
+    this.checkIfAppUpdated();
     this.todos = await this.indexedDbService.getAllTodos();
     this.doneTodos = await this.indexedDbService.getAllDoneTodos();
     this.expiredTodos = await this.indexedDbService.getAllExpiredTodos();
     setInterval(() => this.updateCountdowns(), 1000);
+    setTimeout(() => this.isLoaded = true, 1000);
+  }
+
+  checkIfAppUpdated() {
+    this.newAppUpdateAvailableSubscription = this.webServiceWorker.$isAnyNewUpdateAvailable.subscribe((versionAvailableFlag: boolean) => {
+      this.isNewAppVersionAvailable = versionAvailableFlag;
+    });
+  }
+
+  refreshApp() {
+    window.location.reload();
   }
 
   async addTodo() {
@@ -127,6 +121,22 @@ export class MainComponent implements OnInit {
     await this.indexedDbService.updateExpiredTodo;
   }
 
+  speechToText() {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Your browser does not support speech recognition');
+      return;
+    }
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.start();
+    this.speakButtonText = 'Listening...';
+    recognition.onend = () =>
+      (this.speakButtonText = 'Speak');
+    recognition.onresult = (event: any) => {
+      this.todo.text = event.results[0][0].transcript;
+    };
+  }
+
   updateCountdowns() {
     const now = new Date().getTime();
     this.todos.forEach(todo => {
@@ -151,6 +161,10 @@ export class MainComponent implements OnInit {
       return '0s';
     }
     return `${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  ngOnDestroy() {
+    this.newAppUpdateAvailableSubscription?.unsubscribe();
   }
 }
 

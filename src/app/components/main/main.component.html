@@ -1,4 +1,28 @@
-<div class="container mx-auto">
+<mat-card class="message-container" *ngIf="isNewAppVersionAvailable">
+  <div class="flex items-center">
+    <div>
+      <span class="pr-2">New App Version</span>
+      <small class="pr-2"
+        >A new version of the app is available. Please refresh your browser
+        window or click on the refresh button.</small
+      >
+    </div>
+    <div>
+      <div class="inline-block relative">
+        <button mat-button (click)="refreshApp()" class="rounded h-6">
+          <span class="whitespace-nowrap">Refresh</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</mat-card>
+
+<!-- loading spinner if isLoaded is true -->
+<div class="flex justify-center items-center h-screen" *ngIf="!isLoaded">
+  <mat-spinner diameter="50"></mat-spinner>
+</div>
+
+<div class="container mx-auto" *ngIf="isLoaded">
   <h1 class="text-4xl font-bold text-center my-8">Todo Reminder</h1>
 
   <div class="flex justify-center">
@@ -75,7 +99,6 @@
       </div>
     </li>
   </ul>
-  <h1>notification permission status: {{ notificationPermission }}</h1>
   <h2 class="text-2xl font-bold mt-8">Expired Todos</h2>
   <ul class="mt-4">
     <li
