@@ -1,11 +1,4 @@
 {
-  "name": "Todo Reminder",
-  "short_name": "Todo",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1976d2",
-  "scope": "./",
   "icons": [
     {
       "src": "./assets/icons/windows11/SmallTile.scale-100.png",
