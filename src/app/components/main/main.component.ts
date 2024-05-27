@@ -15,6 +15,7 @@ export class MainComponent implements OnInit {
   notificationPermission = Notification.permission;
   speakButtonText = 'Speak';
   deferredPrompt: any;
+  customNotification: any = null;
 
   constructor(private indexedDbService: IndexedDbService) {
     if ('serviceWorker' in navigator) {
@@ -137,6 +138,20 @@ export class MainComponent implements OnInit {
         todo.timeLeft = this.formatTimeLeft(timeLeft);
       }
     });
+  }
+
+  installApp() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then((choiceResult: { outcome: string; }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        this.deferredPrompt = null;
+      });
+    }
   }
 
   formatTimeLeft(timeLeft: number) {
