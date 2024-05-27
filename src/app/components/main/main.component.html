@@ -8,6 +8,13 @@
       [(ngModel)]="todo.text"
       (keyup.enter)="addTodo()"
     />
+
+    <button
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      (click)="speechToText()"
+    >
+      {{ speakButtonText }}
+    </button>
     <mat-form-field>
       <input
         matInput
@@ -21,6 +28,7 @@
       ></mat-datepicker-toggle>
       <ngx-mat-datetime-picker #picker></ngx-mat-datetime-picker>
     </mat-form-field>
+
     <button
       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       (click)="addTodo()"
@@ -66,6 +74,7 @@
       </div>
     </li>
   </ul>
+  <h1>notification permission status: {{ notificationPermission }}</h1>
   <h2 class="text-2xl font-bold mt-8">Expired Todos</h2>
   <ul class="mt-4">
     <li
@@ -84,7 +93,7 @@
         </button>
         <button
           class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded"
-          (click)="deleteTodo(i)"
+          (click)="deleteExpired(i)"
         >
           Delete
         </button>

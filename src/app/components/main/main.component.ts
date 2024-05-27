@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { IndexedDbService } from 'src/app/services/indexed-db.service';
 
 @Component({
   selector: 'app-main',
@@ -9,10 +10,12 @@ export class MainComponent implements OnInit {
   todos: Array<Todo> = [];
   doneTodos: Array<Todo> = [];
   expiredTodos: Array<Todo> = [];
-  todo = { text: '', done: false, reminder: new Date(), sentPush: false };
+  nowPlusOneMinute = new Date(new Date().getTime() + 10000);
+  todo = { text: '', done: false, reminder: this.nowPlusOneMinute, sentPush: false };
+  notificationPermission = Notification.permission;
+  speakButtonText = 'Speak';
 
-  //log service worker registration/error
-  constructor() {
+  constructor(private indexedDbService: IndexedDbService) {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('ngsw-worker.js').then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
@@ -26,7 +29,7 @@ export class MainComponent implements OnInit {
         if (todo.reminder && new Date(todo.reminder).getTime() - new Date().getTime() <= 5000) {
           if (Notification.permission === 'granted') {
             todo.sentPush = true;
-            this.updateLocalStorage();
+            this.updateTodoInDb(todo);
             new Notification('Todo Reminder', {
               body: todo.text,
               icon: 'assets/icons/icon-72x72.png',
@@ -37,47 +40,75 @@ export class MainComponent implements OnInit {
     }, 1000);
   }
 
-  ngOnInit() {
-    this.todos = JSON.parse(localStorage.getItem('todos') || '[]');
-    this.doneTodos = JSON.parse(localStorage.getItem('doneTodos') || '[]');
+  speechToText() {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Your browser does not support speech recognition');
+      return;
+    }
+    const recognition = new (window as any).webkitSpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.start();
+    this.speakButtonText = 'Listening...';
+    recognition.onend = () =>
+      (this.speakButtonText = 'Speak');
+    recognition.onresult = (event: any) => {
+      this.todo.text = event.results[0][0].transcript;
+    };
+  }
+
+  async ngOnInit() {
+    this.todos = await this.indexedDbService.getAllTodos();
+    this.doneTodos = await this.indexedDbService.getAllDoneTodos();
+    this.expiredTodos = await this.indexedDbService.getAllExpiredTodos();
     setInterval(() => this.updateCountdowns(), 1000);
   }
 
-  addTodo() {
+  async addTodo() {
     if (this.todo.text.trim()) {
       this.todos.push({ ...this.todo });
-      this.updateLocalStorage();
-      this.todo = { text: '', done: false, reminder: new Date(), sentPush: false };
-      //ask for permission to send notifications but only if the browser supports it and the user hasn't already denied it
+      await this.indexedDbService.addTodo({ ...this.todo });
+      this.nowPlusOneMinute = new Date(new Date().getTime() + 10000);
+      this.todo = { text: '', done: false, reminder: this.nowPlusOneMinute, sentPush: false };
       if (Notification.permission === 'default' && 'Notification' in window) {
         Notification.requestPermission();
       }
     }
   }
 
-  deleteTodo(index: number) {
-    this.doneTodos.splice(index, 1);
-    this.updateLocalStorage();
+  async deleteTodo(index: number) {
+    const [deletedTodo] = this.doneTodos.splice(index, 1);
+    await this.indexedDbService.deleteDoneTodoByText(deletedTodo.text);
   }
 
-  done(index: number) {
-    this.todos[index].done = true;
-    this.doneTodos.push(this.todos[index]);
-    this.todos.splice(index, 1);
-    this.updateLocalStorage();
+  async deleteExpired(index: number) {
+    const [deletedExpiredTodo] = this.expiredTodos.splice(index, 1);
+    await this.indexedDbService.deleteExpiredTodoByText(deletedExpiredTodo.text);
   }
 
-  moveToDone(index: number) {
-    this.expiredTodos[index].done = true;
-    this.doneTodos.push(this.expiredTodos[index]);
-    this.expiredTodos.splice(index, 1);
-    this.updateLocalStorage();
+  async done(index: number) {
+    const [doneTodo] = this.todos.splice(index, 1);
+    doneTodo.done = true;
+    this.doneTodos.push(doneTodo);
+    await this.indexedDbService.addDoneTodo(doneTodo);
+    await this.indexedDbService.deleteTodoByText(doneTodo.text);
   }
 
-  updateLocalStorage() {
-    localStorage.setItem('todos', JSON.stringify(this.todos));
-    localStorage.setItem('doneTodos', JSON.stringify(this.doneTodos));
-    localStorage.setItem('expiredTodos', JSON.stringify(this.expiredTodos));
+  async moveToDone(index: number) {
+    const [expiredTodo] = this.expiredTodos.splice(index, 1);
+    expiredTodo.done = true;
+    this.doneTodos.push(expiredTodo);
+    await this.indexedDbService.addDoneTodo(expiredTodo);
+    await this.indexedDbService.deleteExpiredTodoByText(expiredTodo.text);
+  }
+
+  async updateTodoInDb(todo: any) {
+    await this.indexedDbService.updateTodo(todo);
+  }
+
+  async updateLocalStorage() {
+    await this.indexedDbService.updateTodo;
+    await this.indexedDbService.updateDoneTodo;
+    await this.indexedDbService.updateExpiredTodo;
   }
 
   updateCountdowns() {
