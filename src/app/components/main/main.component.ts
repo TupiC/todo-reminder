@@ -19,7 +19,7 @@ export class MainComponent implements OnInit {
 
   constructor(private indexedDbService: IndexedDbService) {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('ngsw-worker.js').then(registration => {
+      navigator.serviceWorker.register('custom-sw.js').then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       }).catch(err => {
         console.error('ServiceWorker registration failed: ', err);
@@ -48,6 +48,8 @@ export class MainComponent implements OnInit {
         }
       });
     }, 1000);
+
+
 
     navigator.serviceWorker.addEventListener('message', event => {
       console.log('Push message received:', event.data);
@@ -140,19 +142,6 @@ export class MainComponent implements OnInit {
     });
   }
 
-  installApp() {
-    if (this.deferredPrompt) {
-      this.deferredPrompt.prompt();
-      this.deferredPrompt.userChoice.then((choiceResult: { outcome: string; }) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the A2HS prompt');
-        } else {
-          console.log('User dismissed the A2HS prompt');
-        }
-        this.deferredPrompt = null;
-      });
-    }
-  }
 
   formatTimeLeft(timeLeft: number) {
     const hours = Math.floor(timeLeft / (1000 * 60 * 60));

@@ -30,7 +30,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     NgxMatNativeDateModule,
     NgxMatTimepickerModule,
     FormsModule,
-    ServiceWorkerModule.register('ngsw-worker.js', {
+    ServiceWorkerModule.register('custom-sw.js', {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:10000'
     }),

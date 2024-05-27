@@ -1,4 +1,10 @@
 // @ts-nocheck
+
+importScripts('./ngsw-worker.js');
+self.addEventListener('notificationclick', (event) => {
+    console.log('notification clicked!')
+});
+
 self.addEventListener('install', event => {
     console.log('Custom Service Worker installing.');
 });
