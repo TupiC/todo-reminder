@@ -14,6 +14,7 @@ export class MainComponent implements OnInit {
   todo = { text: '', done: false, reminder: this.nowPlusOneMinute, sentPush: false };
   notificationPermission = Notification.permission;
   speakButtonText = 'Speak';
+  deferredPrompt: any;
 
   constructor(private indexedDbService: IndexedDbService) {
     if ('serviceWorker' in navigator) {
@@ -23,6 +24,14 @@ export class MainComponent implements OnInit {
         console.error('ServiceWorker registration failed: ', err);
       });
     }
+
+    window.addEventListener('beforeinstallprompt', event => {
+      event.preventDefault();
+      this.deferredPrompt = event;
+      const element = document.getElementById('install-button');
+      if (element)
+        element.style.display = 'block';
+    });
 
     setInterval(() => {
       this.todos.filter(todo => todo.sentPush === false).forEach(todo => {
@@ -38,6 +47,10 @@ export class MainComponent implements OnInit {
         }
       });
     }, 1000);
+
+    navigator.serviceWorker.addEventListener('message', event => {
+      console.log('Push message received:', event.data);
+    });
   }
 
   speechToText() {
@@ -124,6 +137,20 @@ export class MainComponent implements OnInit {
         todo.timeLeft = this.formatTimeLeft(timeLeft);
       }
     });
+  }
+
+  installApp() {
+    if (this.deferredPrompt) {
+      this.deferredPrompt.prompt();
+      this.deferredPrompt.userChoice.then((choiceResult: { outcome: string; }) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        this.deferredPrompt = null;
+      });
+    }
   }
 
   formatTimeLeft(timeLeft: number) {
